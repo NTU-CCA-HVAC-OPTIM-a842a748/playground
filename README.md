@@ -1,5 +1,8 @@
 # playground
 
+## Directory
+- `NOTES.md`: ... for note taking
+
 ## Maintenance
 - `.gitignore`
 	```sh
