@@ -1,0 +1,176 @@
+EnergyPlus Starting
+EnergyPlus, Version 23.1.0-87ed9199d4, YMD=2023.09.09 10:58
+Initializing Response Factors
+Calculating CTFs for "INTERIORFURNISHINGS"
+Calculating CTFs for "TYPICAL IEAD ROOF - HIGHLY REFLECTIVE R-25.64"
+Calculating CTFs for "TYPICAL INSULATED STEEL FRAMED EXTERIOR WALL R-11.9"
+Calculating CTFs for "TYPICAL INTERIOR CEILING"
+Calculating CTFs for "FOUNDATION F 126 PERIM 0 AREA 1916"
+Calculating CTFs for "FOUNDATION F 126 PERIM 0 AREA 19417"
+Calculating CTFs for "FOUNDATION F 126 PERIM 0 AREA 4599"
+Calculating CTFs for "FOUNDATION F 126 PERIM 0 AREA 818"
+Calculating CTFs for "FOUNDATION F 126 PERIM 0 AREA 996"
+Calculating CTFs for "FOUNDATION F 126 PERIM 229 AREA 1254"
+Calculating CTFs for "FOUNDATION F 126 PERIM 244 AREA 1189"
+Calculating CTFs for "FOUNDATION F 126 PERIM 2652 AREA 1505"
+Calculating CTFs for "FOUNDATION F 126 PERIM 2652 AREA 17977"
+Calculating CTFs for "FOUNDATION F 126 PERIM 305 AREA 12217"
+Calculating CTFs for "FOUNDATION F 126 PERIM 305 AREA 1858"
+Calculating CTFs for "FOUNDATION F 126 PERIM 3307 AREA 27035"
+Calculating CTFs for "FOUNDATION F 126 PERIM 335 AREA 1226"
+Calculating CTFs for "FOUNDATION F 126 PERIM 914 AREA 7525"
+Initializing Window Optical Properties
+Initializing Solar Calculations
+Allocate Solar Module Arrays
+Initializing Zone and Enclosure Report Variables
+Initializing Surface (Shading) Report Variables
+Determining Shadowing Combinations
+Computing Window Shade Absorption Factors
+Proceeding with Initializing Solar Calculations
+Initializing Surfaces
+Initializing Outdoor environment for Surfaces
+Setting up Surface Reporting Variables
+Initializing Temperature and Flux Histories
+Initializing Window Shading
+Computing Interior Absorption Factors
+Computing Interior Diffuse Solar Absorption Factors
+Initializing Solar Heat Gains
+Initializing Internal Heat Gains
+Initializing Interior Solar Distribution
+Initializing Interior Convection Coefficients
+Gathering Information for Predefined Reporting
+Completed Initializing Surface Heat Balance
+Calculate Outside Surface Heat Balance
+Calculate Inside Surface Heat Balance
+Calculate Air Heat Balance
+Initializing HVAC
+Warming up
+Calculating Detailed Daylighting Factors, Start Date=08/21
+Warming up
+Warming up
+Warming up
+Warming up
+Warming up
+Performing Zone Sizing Simulation
+...for Sizing Period: #1 TAMPA-MACDILL.AFB_FL_USA ANN CLG .4% CONDNS DB=>MWB
+Warming up
+Calculating Detailed Daylighting Factors, Start Date=01/21
+Warming up
+Warming up
+Warming up
+Warming up
+Warming up
+Warming up
+Warming up
+Performing Zone Sizing Simulation
+...for Sizing Period: #2 TAMPA-MACDILL.AFB_FL_USA ANN HTG 99.6% CONDNS DB
+Calculating System sizing
+...for Sizing Period: #1 TAMPA-MACDILL.AFB_FL_USA ANN CLG .4% CONDNS DB=>MWB
+Calculating System sizing
+...for Sizing Period: #2 TAMPA-MACDILL.AFB_FL_USA ANN HTG 99.6% CONDNS DB
+Adjusting Air System Sizing
+Adjusting Standard 62.1 Ventilation Sizing
+Initializing Simulation
+Reporting Surfaces
+Beginning HVAC Sizing Simulation
+Initializing New Environment Parameters, HVAC Sizing Simulation
+Warming up {1}
+Calculating Detailed Daylighting Factors, Start Date=08/21
+Warming up {2}
+Warming up {3}
+Warming up {4}
+Warming up {5}
+Warming up {6}
+Starting HVAC Sizing Simulation at 08/21 for TAMPA-MACDILL.AFB_FL_USA ANN CLG .4% CONDNS DB=>MWB HVAC Sizing Pass 1
+Initializing New Environment Parameters, HVAC Sizing Simulation
+Warming up {1}
+Calculating Detailed Daylighting Factors, Start Date=01/21
+Warming up {2}
+Warming up {3}
+Warming up {4}
+Warming up {5}
+Warming up {6}
+Warming up {7}
+Warming up {8}
+Warming up {9}
+Warming up {10}
+Warming up {11}
+Warming up {12}
+Warming up {13}
+Starting HVAC Sizing Simulation at 01/21 for TAMPA-MACDILL.AFB_FL_USA ANN HTG 99.6% CONDNS DB HVAC Sizing Pass 1
+Beginning Primary Simulation
+Initializing New Environment Parameters
+Warming up {1}
+Calculating Detailed Daylighting Factors, Start Date=01/01
+Warming up {2}
+Warming up {3}
+Warming up {4}
+Warming up {5}
+Warming up {6}
+Warming up {7}
+Warming up {8}
+Warming up {9}
+Warming up {10}
+Warming up {11}
+Warming up {12}
+Warming up {13}
+Starting Simulation at 01/01/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=01/21/2006
+Updating Detailed Daylighting Factors, Start Date=01/21
+Continuing Simulation at 01/21/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=02/10/2006
+Updating Detailed Daylighting Factors, Start Date=02/10
+Continuing Simulation at 02/10/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=03/02/2006
+Updating Detailed Daylighting Factors, Start Date=03/02
+Continuing Simulation at 03/02/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=03/22/2006
+Updating Detailed Daylighting Factors, Start Date=03/22
+Continuing Simulation at 03/22/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=04/11/2006
+Updating Detailed Daylighting Factors, Start Date=04/11
+Continuing Simulation at 04/11/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=05/01/2006
+Updating Detailed Daylighting Factors, Start Date=05/01
+Continuing Simulation at 05/01/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=05/21/2006
+Updating Detailed Daylighting Factors, Start Date=05/21
+Continuing Simulation at 05/21/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=06/10/2006
+Updating Detailed Daylighting Factors, Start Date=06/10
+Continuing Simulation at 06/10/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=06/30/2006
+Updating Detailed Daylighting Factors, Start Date=06/30
+Continuing Simulation at 06/30/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=07/20/2006
+Updating Detailed Daylighting Factors, Start Date=07/20
+Continuing Simulation at 07/20/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=08/09/2006
+Updating Detailed Daylighting Factors, Start Date=08/09
+Continuing Simulation at 08/09/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=08/29/2006
+Updating Detailed Daylighting Factors, Start Date=08/29
+Continuing Simulation at 08/29/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=09/18/2006
+Updating Detailed Daylighting Factors, Start Date=09/18
+Continuing Simulation at 09/18/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=10/08/2006
+Updating Detailed Daylighting Factors, Start Date=10/08
+Continuing Simulation at 10/08/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=10/28/2006
+Updating Detailed Daylighting Factors, Start Date=10/28
+Continuing Simulation at 10/28/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=11/17/2006
+Updating Detailed Daylighting Factors, Start Date=11/17
+Continuing Simulation at 11/17/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=12/07/2006
+Updating Detailed Daylighting Factors, Start Date=12/07
+Continuing Simulation at 12/07/2006 for RUN PERIOD 1
+Updating Shadowing Calculations, Start Date=12/27/2006
+Updating Detailed Daylighting Factors, Start Date=12/27
+Continuing Simulation at 12/27/2006 for RUN PERIOD 1
+Writing tabular output file results using HTML format.
+Computing Life Cycle Costs and Reporting
+Writing final SQL reports
+EnergyPlus Run Time=00hr 06min  0.31sec
+EnergyPlus Completed Successfully.
