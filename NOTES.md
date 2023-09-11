@@ -4,3 +4,6 @@
 	https://www.energy.gov/eere/buildings/commercial-reference-buildings
 - OpenAI Gym environment for building simulation and control using reinforcement learning
 	https://github.com/ugr-sail/sinergym
+- https://www.energy.gov/eere/buildings/articles/spawn-energyplus-spawn
+- https://github.com/mechyai/rl_bca
+- https://github.com/mechyai/RL-EmsPy
