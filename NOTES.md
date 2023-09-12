@@ -7,3 +7,4 @@
 - https://www.energy.gov/eere/buildings/articles/spawn-energyplus-spawn
 - https://github.com/mechyai/rl_bca
 - https://github.com/mechyai/RL-EmsPy
+- https://bigladdersoftware.com/epx/docs/9-6/input-output-reference/api-usage.html
