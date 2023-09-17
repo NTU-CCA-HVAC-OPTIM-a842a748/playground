@@ -1,70 +1,25 @@
-# TODO ...
-
-import contextlib
-import builtins
-
-@contextlib.contextmanager
-def temporary_attr(o, name: str):
-    a = builtins.getattr(o, name)
-    try: yield
-    finally: builtins.setattr(o, name, a)
-
-import sys
-
-@contextlib.contextmanager
-def temporary_search_path(*paths):
-    with temporary_attr(sys, 'path'):
-        setattr(sys, 'path', [str(p) for p in paths])
-        try: yield
-        finally: pass
-
-import os
-import shutil
-
-def find_energyplus(exec_name='energyplus'):
-    return os.path.dirname(
-        os.path.realpath(shutil.which(exec_name))
-    )
-
-# TODO
-import os
-os.environ['PATH'] += f''':{os.path.expanduser('~/.local/bin')}'''
-
-energyplus_path = find_energyplus()
-with temporary_search_path(energyplus_path):
-    import pyenergyplus as eplus
-    import pyenergyplus.api
-##### TODO !!!!!!!!!!!!!!!!!!!!!
-
-
-
-
+import abc
 import typing
-
-
-
-import packaging
+import collections
 import io
 import csv
-import collections
 
+import packaging
 import pandas as pd
 
-import typing
-import types
-
-
-import abc
+from . import utils
 
 
 class Environment:
-    def __init__(self, base_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
+    def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
         # TODO
+        self._ep_api = ep_api
+        if self._ep_api is None:
+            ep = utils.energyplus.importer.import_package(
+                submodules=['api']
+            )
+            self._ep_api = ep.api.EnergyPlusAPI()
 
-        if base_api is None:
-            pass
-
-        self._ep_api = eplus.api.EnergyPlusAPI()
         assert (
             packaging.version.Version(self._ep_api.api_version())
                 >= packaging.version.Version('0.2')
@@ -394,3 +349,7 @@ class Environment:
             specs,
             lambda d: self.Event(d, environment=self)
         )
+
+__all__ = [
+    Environment
+]
