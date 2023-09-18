@@ -36,11 +36,11 @@ class Importer:
 
     def import_package(
         self,
-        submodules: typing.Collection[str] = ['api'],
+        submodules: typing.Collection[str] = ['.api'],
         **importlib_options
     ):
         pkg = self.__import__(**importlib_options)
-        _ = self.import_modules(submodules)
+        _ = self.import_modules(*submodules)
         return pkg
 
 importer = Importer()

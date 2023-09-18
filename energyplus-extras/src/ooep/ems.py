@@ -11,21 +11,26 @@ from . import utils
 
 
 class Environment:
+    _target_ep_api_version = packaging.version.Version('0.2')
+
+    @classmethod
+    def _ep_api_version(cls, ep_api: 'pyenergyplus.api.EnergyPlusAPI'): 
+        return packaging.version.Version(ep_api.api_version())
+
     def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
-        # TODO
         self._ep_api = ep_api
         if self._ep_api is None:
             ep = utils.energyplus.importer.import_package(
-                submodules=['api']
+                submodules=['.api']
             )
             self._ep_api = ep.api.EnergyPlusAPI()
 
-        assert (
-            packaging.version.Version(self._ep_api.api_version())
-                >= packaging.version.Version('0.2')
-        )
-
-        pass
+        if not self._ep_api_version(self._ep_api) >= self._target_ep_api_version:
+            raise Exception(
+                f'pyenergyplus version incompatible: '
+                f'{self.__class__} requires {self._target_ep_api_version}; '
+                f'got {self._ep_api_version(ep_api)}'
+            )
 
     def __enter__(self):
         # TODO
@@ -243,7 +248,7 @@ class Environment:
                     state, callback
                 )
 
-            runtime: eplus.api.runtime
+            runtime: 'pyenergyplus.api.runtime'
             return {
                 # state callbacks
                 cls.Specs('after_component_input'):

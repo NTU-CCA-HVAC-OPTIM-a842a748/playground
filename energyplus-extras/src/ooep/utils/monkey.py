@@ -12,7 +12,7 @@ import sys
 @contextlib.contextmanager
 def temporary_search_path(*paths):
     with temporary_attr(sys, 'path'):
-        setattr(sys, 'path', [str(p) for p in paths])
+        builtins.setattr(sys, 'path', [str(p) for p in paths])
         try: yield
         finally: pass
 
