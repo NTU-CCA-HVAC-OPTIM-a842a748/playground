@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import os
 import shutil
 import importlib
 import typing
+import pathlib
 
 from . import monkey
 
@@ -36,7 +39,7 @@ class Importer:
 
     def import_package(
         self,
-        submodules: typing.Collection[str] = ['.api'],
+        submodules: typing.Collection[str],
         **importlib_options
     ):
         pkg = self.__import__(**importlib_options)
@@ -45,7 +48,25 @@ class Importer:
 
 importer = Importer()
 
+class Dataset:
+    def __init__(self, base_path: str | bytes | os.PathLike):
+        self.base_path = pathlib.Path(base_path)
+
+    @property
+    def models(self):
+        return self.base_path / 'ExampleFiles'
+
+    @property
+    def weathers(self):
+        return self.base_path / 'WeatherData'
+    
+    @property
+    def datas(self):
+        return self.base_path / 'DataSets'
+
+dataset = Dataset(base_path=importer.base_path)
+
 __all__ = [
-    Importer,
-    importer
+    Importer, importer,
+    Dataset, dataset
 ]

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import typing
 import collections
@@ -10,7 +12,7 @@ import pandas as pd
 from . import utils
 
 
-class Environment:
+class BaseEnvironment:
     _target_ep_api_version = packaging.version.Version('0.2')
 
     @classmethod
@@ -18,19 +20,13 @@ class Environment:
         return packaging.version.Version(ep_api.api_version())
 
     def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
-        self._ep_api = ep_api
-        if self._ep_api is None:
-            ep = utils.energyplus.importer.import_package(
-                submodules=['.api']
-            )
-            self._ep_api = ep.api.EnergyPlusAPI()
-
-        if not self._ep_api_version(self._ep_api) >= self._target_ep_api_version:
+        if not self._ep_api_version(ep_api) >= self._target_ep_api_version:
             raise Exception(
                 f'pyenergyplus version incompatible: '
                 f'{self.__class__} requires {self._target_ep_api_version}; '
                 f'got {self._ep_api_version(ep_api)}'
             )
+        self._ep_api = ep_api
 
     def __enter__(self):
         # TODO
@@ -60,9 +56,11 @@ class Environment:
     def _stop(self):
         self._ep_api.runtime.stop_simulation(self._ep_state)
 
-    @property
-    def _ready(self):
-        return self._ep_api.exchange.api_data_fully_ready(self._ep_state)
+    def __call__(self, *args):
+        return self._exec(*args)
+    
+    def stop(self):
+        return self._stop()
 
     @property
     def _available_data(self):
@@ -101,6 +99,10 @@ class Environment:
                 ) for title in colnames
             }
 
+    @property
+    def _data_ready(self):
+        return self._ep_api.exchange.api_data_fully_ready(self._ep_state)
+
     class Specs(typing.NamedTuple):
         actuators: pd.DataFrame
         # TODO ...
@@ -121,10 +123,17 @@ class Environment:
         )
 
     class Component(abc.ABC):
+        class NotReadyError(Exception):
+            pass
+
         class Specs(typing.NamedTuple):
             ...
 
-        def __init__(self, specs: Specs | typing.Mapping, environment: 'Environment'):
+        def __init__(
+            self, 
+            specs: Specs | typing.Mapping, 
+            environment: 'Environment'
+        ):
             self._specs = self.Specs(**specs)
             self._env = environment
 
@@ -135,7 +144,7 @@ class Environment:
     def _component(
         self,
         specs: typing.Mapping | Component.Specs | pd.DataFrame,
-        constructor: typing.Callable[[], Component]
+        constructor: typing.Callable[[Component.Specs], Component]
     ):
         if isinstance(specs, pd.DataFrame):
             return pd.DataFrame.apply(specs, constructor, axis='columns')
@@ -149,7 +158,8 @@ class Environment:
 
         @property
         def _ep_handle(self):
-            # TODO
+            if not self._env._data_ready:
+                raise self.NotReadyError()
             return self._env._ep_api.exchange.get_actuator_handle(
                 self._env._ep_state,
                 component_type=self._specs.component_type,
@@ -206,6 +216,8 @@ class Environment:
 
         @property
         def _ep_handle(self):
+            if not self._env._data_ready:
+                raise self.NotReadyError()
             return self._env._ep_api.exchange.get_variable_handle(
                 self._env._ep_state,
                 variable_name=self._specs.variable_name,
@@ -235,8 +247,8 @@ class Environment:
 
         @classmethod
         def _get_ep_callback_setters(cls):
-            # TODO NOTE state:
-            # TODO NOTE each state only has a single callback; states dont share callbacks!
+            # TODO NOTE of states: each state only has a single callback; states don't share callbacks! 
+            #   that's why we don't need to pass the state (or its wrapper `Environment`) to clients
             def _state_callback_setter(state, base_setter):
                 return lambda callback: base_setter(
                     state,
@@ -257,7 +269,7 @@ class Environment:
                     ),
                 cls.Specs('after_new_environment_warmup_complete'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.after_new_environment_warmup_complete
+                        state, runtime.callback_after_new_environment_warmup_complete
                     ),
                 cls.Specs('after_predictor_after_hvac_managers'):
                     lambda state, runtime: _state_callback_setter(
@@ -273,19 +285,19 @@ class Environment:
                     ),
                 cls.Specs('begin_system_timestep_before_predictor'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.begin_system_timestep_before_predictor
+                        state, runtime.callback_begin_system_timestep_before_predictor
                     ),
                 cls.Specs('begin_zone_timestep_after_init_heat_balance'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.begin_zone_timestep_after_init_heat_balance
+                        state, runtime.callback_begin_zone_timestep_after_init_heat_balance
                     ),
                 cls.Specs('begin_zone_timestep_before_init_heat_balance'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.begin_zone_timestep_before_init_heat_balance
+                        state, runtime.callback_begin_zone_timestep_before_init_heat_balance
                     ),
                 cls.Specs('begin_zone_timestep_before_set_current_weather'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.begin_zone_timestep_before_set_current_weather
+                        state, runtime.callback_begin_zone_timestep_before_set_current_weather
                     ),
                 cls.Specs('end_system_sizing'):
                     lambda state, runtime: _state_callback_setter(
@@ -293,11 +305,11 @@ class Environment:
                     ),
                 cls.Specs('end_system_timestep_after_hvac_reporting'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.end_system_timestep_after_hvac_reporting
+                        state, runtime.callback_end_system_timestep_after_hvac_reporting
                     ),
                 cls.Specs('end_system_timestep_before_hvac_reporting'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.end_system_timestep_before_hvac_reporting
+                        state, runtime.callback_end_system_timestep_before_hvac_reporting
                     ),
                 cls.Specs('end_zone_sizing'):
                     lambda state, runtime: _state_callback_setter(
@@ -305,11 +317,11 @@ class Environment:
                     ),
                 cls.Specs('end_zone_timestep_after_zone_reporting'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.end_zone_timestep_after_zone_reporting
+                        state, runtime.callback_end_zone_timestep_after_zone_reporting
                     ),
                 cls.Specs('end_zone_timestep_before_zone_reporting'):
                     lambda state, runtime: _state_callback_setter(
-                        state, runtime.end_zone_timestep_before_zone_reporting
+                        state, runtime.callback_end_zone_timestep_before_zone_reporting
                     ),
                 cls.Specs('inside_system_iteration_loop'):
                     lambda state, runtime: _state_callback_setter(
@@ -340,7 +352,7 @@ class Environment:
 
         @property
         def callback(self):
-            raise NotImplementedError('function not available')
+            raise NotImplementedError('function not available: callbacks are write-only')
 
         @callback.setter
         def callback(self, f):
@@ -355,6 +367,21 @@ class Environment:
             lambda d: self.Event(d, environment=self)
         )
 
+class Environment(BaseEnvironment):
+    def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
+        if ep_api is None:
+            ep = utils.energyplus.importer.import_package(
+                submodules=['.api']
+            )
+            ep_api = ep.api.EnergyPlusAPI()
+
+        return super().__init__(ep_api)
+    
+    def __call__(self, *args):
+        self._console_output(enabled=False)
+        return super().__call__(*args)
+
 __all__ = [
+    BaseEnvironment,
     Environment
 ]
