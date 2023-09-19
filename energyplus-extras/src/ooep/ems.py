@@ -377,10 +377,10 @@ class Environment(BaseEnvironment):
 
         return super().__init__(ep_api)
     
-    def __call__(self, *args):
-        self._console_output(enabled=False)
+    def __call__(self, *args, console_output: bool = False):
+        self._console_output(enabled=console_output)
         return super().__call__(*args)
-
+    
 __all__ = [
     BaseEnvironment,
     Environment
