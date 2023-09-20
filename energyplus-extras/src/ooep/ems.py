@@ -16,7 +16,7 @@ class BaseEnvironment:
     _target_ep_api_version = packaging.version.Version('0.2')
 
     @classmethod
-    def _ep_api_version(cls, ep_api: 'pyenergyplus.api.EnergyPlusAPI'): 
+    def _ep_api_version(cls, ep_api: 'pyenergyplus.api.EnergyPlusAPI'):
         return packaging.version.Version(ep_api.api_version())
 
     def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
@@ -58,7 +58,7 @@ class BaseEnvironment:
 
     def __call__(self, *args):
         return self._exec(*args)
-    
+
     def stop(self):
         return self._stop()
 
@@ -104,21 +104,35 @@ class BaseEnvironment:
         return self._ep_api.exchange.api_data_fully_ready(self._ep_state)
 
     class Specs(typing.NamedTuple):
+        # datas
         actuators: pd.DataFrame
-        # TODO ...
+        internal_variables: pd.DataFrame
+        # plugin_variables: pd.DataFrame
+        # plugin_trends: pd.DataFrame
+        meters: pd.DataFrame
         variables: pd.DataFrame
-        # TODO ...
+        # events
         events: pd.DataFrame
 
     @property
     def specs(self) -> Specs:
         return self.Specs(
-            actuators=self._available_data['**ACTUATORS**'][[*self.Actuator.Specs._fields]],
-            #internal_variables=...,
-            #plugin_global_variables=...,
-            #trends=...,
-            variables=self._available_data['**VARIABLES**'][[*self.Variable.Specs._fields]],
-            # TODO ... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # datas
+            actuators=self._available_data['**ACTUATORS**'][
+                [*self.Actuator.Specs._fields]
+            ],
+            internal_variables=self._available_data['**INTERNAL_VARIABLES**'][
+                [*self.InternalVariable.Specs._fields]
+            ],
+            #plugin_variables=...,
+            #plugin_trends=...,
+            meters=self._available_data['**METERS**'][
+                [*self.Meter.Specs._fields]
+            ],
+            variables=self._available_data['**VARIABLES**'][
+                [*self.Variable.Specs._fields]
+            ],
+            # events
             events=pd.DataFrame(self.Event._get_ep_available_specs())
         )
 
@@ -130,8 +144,8 @@ class BaseEnvironment:
             ...
 
         def __init__(
-            self, 
-            specs: Specs | typing.Mapping, 
+            self,
+            specs: Specs | typing.Mapping,
             environment: 'Environment'
         ):
             self._specs = self.Specs(**specs)
@@ -194,6 +208,63 @@ class BaseEnvironment:
             lambda d: self.Actuator(d, environment=self)
         )
 
+    class InternalVariable(Component):
+        class Specs(typing.NamedTuple):
+            variable_type: str
+            variable_key: str
+
+        @property
+        def _ep_handle(self):
+            if not self._env._data_ready:
+                raise self.NotReadyError()
+            return self._env._ep_api.exchange.get_internal_variable_handle(
+                self._env._ep_state,
+                variable_name=self._specs.variable_name,
+                variable_key=self._specs.variable_key
+            )
+
+        @property
+        def value(self):
+            return self._env._ep_api.exchange.get_internal_variable_value(
+                self._env._ep_state,
+                variable_handle=self._ep_handle
+            )
+
+    def internal_variable(
+        self,
+        specs: typing.Mapping | InternalVariable.Specs | pd.DataFrame
+    ) -> InternalVariable:
+        return self._component(
+            specs,
+            lambda d: self.InternalVariable(d, environment=self)
+        )
+
+    class Meter(Component):
+        class Specs(typing.NamedTuple):
+            meter_name: str
+
+        @property
+        def _ep_handle(self):
+            if not self._env._data_ready:
+                raise self.NotReadyError()
+            return self._env._ep_api.exchange.get_meter_handle(
+                self._env._ep_state,
+                meter_name=self._specs.meter_name
+            )
+
+        @property
+        def value(self):
+            return self._env._ep_api.exchange.get_meter_value(
+                self._env._ep_state,
+                meter_handle=self._ep_handle
+            )
+
+    def meter(self, specs: typing.Mapping | Meter.Specs | pd.DataFrame) -> Meter:
+        return self._component(
+            specs,
+            lambda d: self.Meter(d, environment=self)
+        )
+
     class Variable(Component):
         class Specs(typing.NamedTuple):
             variable_name: str
@@ -225,10 +296,6 @@ class BaseEnvironment:
             )
 
         @property
-        def specs(self):
-            return self._specs
-
-        @property
         def value(self):
             return self._env._ep_api.exchange.get_variable_value(
                 self._env._ep_state,
@@ -247,7 +314,7 @@ class BaseEnvironment:
 
         @classmethod
         def _get_ep_callback_setters(cls):
-            # TODO NOTE of states: each state only has a single callback; states don't share callbacks! 
+            # TODO NOTE of states: each state only has a single callback; states don't share callbacks!
             #   that's why we don't need to pass the state (or its wrapper `Environment`) to clients
             def _state_callback_setter(state, base_setter):
                 return lambda callback: base_setter(
@@ -376,11 +443,11 @@ class Environment(BaseEnvironment):
             ep_api = ep.api.EnergyPlusAPI()
 
         return super().__init__(ep_api)
-    
+
     def __call__(self, *args, console_output: bool = False):
         self._console_output(enabled=console_output)
         return super().__call__(*args)
-    
+
 __all__ = [
     BaseEnvironment,
     Environment
