@@ -1,5 +1,5 @@
-import contextlib
 import builtins
+import contextlib
 
 @contextlib.contextmanager
 def temporary_attr(o, name: str):

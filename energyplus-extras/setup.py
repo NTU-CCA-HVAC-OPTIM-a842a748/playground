@@ -2,17 +2,18 @@
 
 import setuptools
 
+
 setuptools.setup(
     name='energyplus-extras',
     version='0.0.0a',
-    description='EnergyPlus Object-Oriented API',
+    description='EnergyPlus Python API Extras',
     python_requires='>=3.9',
     packages=['ooep'],
     package_dir={
         '': 'src'
-    },    
+    },
     install_requires=[
-        'packaging', 
+        'packaging',
         'pandas'
     ],
     extras_require={

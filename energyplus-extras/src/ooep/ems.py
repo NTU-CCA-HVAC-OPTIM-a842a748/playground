@@ -64,7 +64,6 @@ class BaseEnvironment:
 
     @property
     def _available_data(self):
-        # TODO NOTE headsup! upcoming version will include `get_api_data`
         def _ep_csv_reader(f, default_title=None):
             title = default_title
             for row in csv.reader(f):
@@ -72,6 +71,8 @@ class BaseEnvironment:
                     title = row.pop()
                 yield title, row
 
+        # TODO NOTE headsup! upcoming version will include `get_api_data`:
+        # csv may no longer be needed
         with io.StringIO(
             self._ep_api.exchange
                 .list_available_api_data_csv(self._ep_state)
@@ -202,7 +203,10 @@ class BaseEnvironment:
                 actuator_handle=self._ep_handle
             )
 
-    def actuator(self, specs: typing.Mapping | Actuator.Specs | pd.DataFrame) -> Actuator:
+    def actuator(
+        self,
+        specs: typing.Mapping | Actuator.Specs | pd.DataFrame
+    ) -> Actuator:
         return self._component(
             specs,
             lambda d: self.Actuator(d, environment=self)
@@ -259,7 +263,10 @@ class BaseEnvironment:
                 meter_handle=self._ep_handle
             )
 
-    def meter(self, specs: typing.Mapping | Meter.Specs | pd.DataFrame) -> Meter:
+    def meter(
+        self,
+        specs: typing.Mapping | Meter.Specs | pd.DataFrame
+    ) -> Meter:
         return self._component(
             specs,
             lambda d: self.Meter(d, environment=self)
@@ -302,7 +309,10 @@ class BaseEnvironment:
                 variable_handle=self._ep_handle
             )
 
-    def variable(self, specs: typing.Mapping | Variable.Specs | pd.DataFrame) -> Variable:
+    def variable(
+        self,
+        specs: typing.Mapping | Variable.Specs | pd.DataFrame
+    ) -> Variable:
         return self._component(
             specs,
             lambda d: self.Variable(d, environment=self)
@@ -428,11 +438,24 @@ class BaseEnvironment:
                 runtime=self._env._ep_api.runtime
             )(f)
 
-    def event(self, specs: typing.Mapping | Event.Specs | pd.DataFrame) -> Event:
+    def event(
+        self,
+        specs: typing.Mapping | Event.Specs | pd.DataFrame
+    ) -> Event:
         return self._component(
             specs,
             lambda d: self.Event(d, environment=self)
         )
+
+    @property
+    def datetime(self):
+        import datetime
+
+
+
+        # TODO
+        raise NotImplementedError
+        pass
 
 class Environment(BaseEnvironment):
     def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
