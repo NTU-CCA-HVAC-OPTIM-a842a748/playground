@@ -5,6 +5,7 @@ import typing
 import collections
 import io
 import csv
+import datetime
 
 import packaging
 import pandas as pd
@@ -448,14 +449,15 @@ class BaseEnvironment:
         )
 
     @property
-    def datetime(self):
-        import datetime
-
-
-
+    def _TODO_datetime(self):
         # TODO
-        raise NotImplementedError
-        pass
+        return datetime.datetime(
+            year=self._ep_api.exchange.year(self._ep_state),
+            month=self._ep_api.exchange.month(self._ep_state),
+            day=self._ep_api.exchange.day_of_month(self._ep_state),
+            hour=self._ep_api.exchange.hour(self._ep_state),
+            minute=self._ep_api.exchange.minutes(self._ep_state)
+        )
 
 class Environment(BaseEnvironment):
     def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
