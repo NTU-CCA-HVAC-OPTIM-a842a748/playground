@@ -13,7 +13,10 @@ import pandas as pd
 from . import utils
 
 
-class BaseEnvironment:
+class NotReadyError(Exception):
+    pass
+
+class BaseEnvironment(abc.ABC):
     _target_ep_api_version = packaging.version.Version('0.2')
 
     @classmethod
@@ -139,7 +142,7 @@ class BaseEnvironment:
         )
 
     class Component(abc.ABC):
-        class NotReadyError(Exception):
+        class NotReadyError(NotReadyError):
             pass
 
         class Specs(typing.NamedTuple):
@@ -335,7 +338,8 @@ class BaseEnvironment:
 
             def _data_callback_setter(state, base_setter):
                 return lambda callback: base_setter(
-                    state, callback
+                    state,
+                    lambda x: callback(x)
                 )
 
             runtime: 'pyenergyplus.api.runtime'
@@ -449,15 +453,20 @@ class BaseEnvironment:
         )
 
     @property
-    def _TODO_datetime(self):
+    def datetime(self):
         # TODO
         return datetime.datetime(
             year=self._ep_api.exchange.year(self._ep_state),
             month=self._ep_api.exchange.month(self._ep_state),
             day=self._ep_api.exchange.day_of_month(self._ep_state),
             hour=self._ep_api.exchange.hour(self._ep_state),
-            minute=self._ep_api.exchange.minutes(self._ep_state)
+            # TODO NOTE energyplus api returns 0?-60: datetime requires range(60)
+            minute=self._ep_api.exchange.minutes(self._ep_state) % datetime.datetime.max.minute
         )
+    
+    @property
+    def warming_up(self):
+        return self._ep_api.exchange.warmup_flag(self._ep_state)
 
 class Environment(BaseEnvironment):
     def __init__(self, ep_api: 'pyenergyplus.api.EnergyPlusAPI' = None):
@@ -473,7 +482,21 @@ class Environment(BaseEnvironment):
         self._console_output(enabled=console_output)
         return super().__call__(*args)
 
+    class Event(BaseEnvironment.Event):
+        @BaseEnvironment.Event.callback.setter
+        def callback(self, f):
+            def _f_safe(*args, **kwargs):
+                nonlocal self, f
+                try:
+                    return f(*args, **kwargs)
+                except Exception as e:
+                    # TODO make this available
+                    #self._env.stop()
+                    raise e
+            return BaseEnvironment.Event.callback.fset(self, _f_safe)
+
 __all__ = [
+    NotReadyError,
     BaseEnvironment,
     Environment
 ]

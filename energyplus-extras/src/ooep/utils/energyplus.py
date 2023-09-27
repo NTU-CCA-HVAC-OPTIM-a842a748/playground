@@ -20,8 +20,15 @@ class Importer:
 
     @property
     def base_path(self):
+        exec_path = shutil.which(self.exec_name)
+        if exec_path is None:
+            raise FileNotFoundError(
+                f'`{self.exec_name}` binary required '
+                f'to locate `{self.package_name}` but not found: '
+                'make sure it is installed and in the search path'
+            )
         return os.path.dirname(
-            os.path.realpath(shutil.which(self.exec_name))
+            os.path.realpath(exec_path)
         )
 
     def __import__(self, **importlib_options):
