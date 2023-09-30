@@ -69,21 +69,6 @@ class Artist(matplotlib.artist.Artist, abc.ABC):
     def step(self):
         self._step_callbacks()
 
-    # TODO remove !!!!
-    '''
-    def set_factory(self, **prop_factories):
-        self._prop_factories = prop_factories
-        return self
-
-    def step(self, *args, **kwargs):
-        if not hasattr(self, '_prop_factories'):
-            return
-        return self.set(**{
-            prop_name: f(*args, **kwargs)
-                for prop_name, f in self._prop_factories.items()
-        })
-    '''
-
 class FlexArtist(Artist):
     def autofit(self, enable=True):
         self._autofit = enable

@@ -101,3 +101,8 @@ class FigureAnimation:
                 continue
             art.step(*args, **kwargs)
         self._blit_manager.update()
+
+__all__ = [
+    BlitManager,
+    FigureAnimation
+]

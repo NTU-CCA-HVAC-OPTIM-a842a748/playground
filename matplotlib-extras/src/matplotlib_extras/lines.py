@@ -36,5 +36,6 @@ class SimpleLine2D(Line2D):
         return self.extend_data_1d([ydata], orig=orig)
 
 __all__ = [
-    Line2D, SimpleLine2D
+    Line2D, 
+    SimpleLine2D
 ]
