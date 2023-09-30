@@ -160,6 +160,15 @@ class BaseEnvironment(abc.ABC):
         def specs(self):
             return self._specs
 
+        @property
+        def name(self):
+            return str.join(' | ', self.specs)
+
+    class DataComponent(Component):
+        @property
+        def value(self):
+            ...
+
     def _component(
         self,
         specs: typing.Mapping | Component.Specs | pd.DataFrame,
@@ -169,7 +178,7 @@ class BaseEnvironment(abc.ABC):
             return pd.DataFrame.apply(specs, constructor, axis='columns')
         return constructor(specs)
 
-    class Actuator(Component):
+    class Actuator(DataComponent, Component):
         class Specs(typing.NamedTuple):
             component_type: str
             control_type: str
@@ -216,7 +225,7 @@ class BaseEnvironment(abc.ABC):
             lambda d: self.Actuator(d, environment=self)
         )
 
-    class InternalVariable(Component):
+    class InternalVariable(DataComponent, Component):
         class Specs(typing.NamedTuple):
             variable_type: str
             variable_key: str
@@ -247,7 +256,7 @@ class BaseEnvironment(abc.ABC):
             lambda d: self.InternalVariable(d, environment=self)
         )
 
-    class Meter(Component):
+    class Meter(DataComponent, Component):
         class Specs(typing.NamedTuple):
             meter_name: str
 
@@ -276,7 +285,7 @@ class BaseEnvironment(abc.ABC):
             lambda d: self.Meter(d, environment=self)
         )
 
-    class Variable(Component):
+    class Variable(DataComponent, Component):
         class Specs(typing.NamedTuple):
             variable_name: str
             variable_key: str
@@ -323,6 +332,11 @@ class BaseEnvironment(abc.ABC):
         )
 
     class Event(Component):
+        Callback = typing.Callable
+        StateCallback = Callback[[], typing.Any]
+        MessageCallback = Callback[[str], typing.Any]
+        ProgressCallback = Callback[[int], typing.Any]
+
         class Specs(typing.NamedTuple):
             event_name: str
 
@@ -344,7 +358,7 @@ class BaseEnvironment(abc.ABC):
 
             runtime: 'pyenergyplus.api.runtime'
             return {
-                # state callbacks
+                # state callbacks (StateCallback)
                 cls.Specs('after_component_input'):
                     lambda state, runtime: _state_callback_setter(
                         state, runtime.callback_after_component_get_input
@@ -418,10 +432,12 @@ class BaseEnvironment(abc.ABC):
                         state, runtime.callback_unitary_system_sizing
                     ),
                 # data callbacks
+                # - MessageCallback
                 cls.Specs('message'):
                     lambda state, runtime: _data_callback_setter(
                         state, runtime.callback_message
                     ),
+                # - ProgressCallback
                 cls.Specs('progress'):
                     lambda state, runtime: _data_callback_setter(
                         state, runtime.callback_progress
@@ -437,7 +453,7 @@ class BaseEnvironment(abc.ABC):
             raise NotImplementedError('function not available: callbacks are write-only')
 
         @callback.setter
-        def callback(self, f):
+        def callback(self, f: Callback):
             self._get_ep_callback_setters()[self._specs](
                 state=self._env._ep_state,
                 runtime=self._env._ep_api.runtime
@@ -463,7 +479,7 @@ class BaseEnvironment(abc.ABC):
             # TODO NOTE energyplus api returns 0?-60: datetime requires range(60)
             minute=self._ep_api.exchange.minutes(self._ep_state) % datetime.datetime.max.minute
         )
-    
+
     @property
     def warming_up(self):
         return self._ep_api.exchange.warmup_flag(self._ep_state)
