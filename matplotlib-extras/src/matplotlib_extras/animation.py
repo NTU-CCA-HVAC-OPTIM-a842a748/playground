@@ -95,12 +95,18 @@ class FigureAnimation:
             self._blit_manager.add_artist(art)
         return self
 
-    def step(self, *args, **kwargs):
+    def step_artists(self, *args, **kwargs):
         for art in self._blit_manager._artists:
             if not isinstance(art, artist.Artist):
                 continue
             art.step(*args, **kwargs)
+
+    def draw_artists(self):
         self._blit_manager.update()
+
+    def step(self, *args, **kwargs):
+        self.step_artists(*args, **kwargs)
+        self.draw_artists()
 
 __all__ = [
     BlitManager,

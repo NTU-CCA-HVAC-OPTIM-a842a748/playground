@@ -7,14 +7,34 @@ class Line2D(matplotlib.lines.Line2D, artist.FlexArtist):
         return super().__init__(xdata, ydata, **kwargs)
 
     def extend_data(self, *datas, orig=True):
-        self.set_data(*(
-            [*old_data, *data]
-            for old_data, data in
-            zip(self.get_data(orig=orig), datas)
-        ))
+        """
+        Extend the x and y data.
+
+        Parameters
+        ----------
+        *args : (2, N) array or two 1D arrays
+        """
+
+        # TODO NOTE datas: tuple of 1d arrays: (<xdata>, <ydata>, ...)
+        def _impl(datas, orig):
+            self.set_data(*(
+                [*old_data, *data]
+                for old_data, data in
+                zip(self.get_data(orig=orig), datas)
+            ))
+
+        if len(datas) == 1:
+            return _impl(*datas, orig=orig)
+        return _impl(datas, orig=orig)
 
     def append_data(self, *datas, orig=True):
-        return self.extend_data(*([d] for d in datas), orig=orig)
+        # TODO NOTE datas: tuple: (<xdata>, <ydata>, ...)
+        def _impl(datas, orig):
+            return self.extend_data(tuple([d] for d in datas), orig=orig)
+
+        if len(datas) == 1:
+            return _impl(*datas, orig=orig)
+        return _impl(datas, orig=orig)
 
 class SimpleLine2D(Line2D):
     @classmethod
@@ -36,6 +56,6 @@ class SimpleLine2D(Line2D):
         return self.extend_data_1d([ydata], orig=orig)
 
 __all__ = [
-    Line2D, 
+    Line2D,
     SimpleLine2D
 ]

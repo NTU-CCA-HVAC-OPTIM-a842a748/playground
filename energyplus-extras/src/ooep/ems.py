@@ -507,7 +507,7 @@ class Environment(BaseEnvironment):
                     return f(*args, **kwargs)
                 except Exception as e:
                     # TODO make this available
-                    #self._env.stop()
+                    self._env.stop()
                     raise e
             return BaseEnvironment.Event.callback.fset(self, _f_safe)
 
