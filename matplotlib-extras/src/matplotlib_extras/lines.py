@@ -1,6 +1,9 @@
+import typing
+
 import matplotlib.lines
 
 from . import artist
+
 
 class Line2D(matplotlib.lines.Line2D, artist.FlexArtist):
     def __init__(self, xdata=[], ydata=[], **kwargs):
@@ -59,7 +62,20 @@ class SimpleLine2D(Line2D):
     def append_data_1d(self, ydata, orig=True):
         return self.extend_data_1d([ydata], orig=orig)
 
+class StepFunction2D(Line2D):
+    def __init__(
+        self,
+        *data_srcs: typing.Callable,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.on_step(
+            'append_data',
+            *data_srcs
+        )
+
 __all__ = [
     Line2D,
-    SimpleLine2D
+    SimpleLine2D,
+    StepFunction2D
 ]
