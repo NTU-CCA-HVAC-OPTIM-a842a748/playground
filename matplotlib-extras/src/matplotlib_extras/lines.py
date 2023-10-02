@@ -13,6 +13,10 @@ class Line2D(matplotlib.lines.Line2D, artist.FlexArtist):
         Parameters
         ----------
         *args : (2, N) array or two 1D arrays
+
+        Examples
+        --------
+        TODO
         """
 
         # TODO NOTE datas: tuple of 1d arrays: (<xdata>, <ydata>, ...)

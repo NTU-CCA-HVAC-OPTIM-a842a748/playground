@@ -6,6 +6,8 @@ import collections
 import io
 import csv
 import datetime
+import functools
+import dataclasses
 
 import packaging
 import pandas as pd
@@ -153,7 +155,12 @@ class BaseEnvironment(abc.ABC):
             specs: Specs | typing.Mapping,
             environment: 'Environment'
         ):
-            self._specs = self.Specs(**specs)
+            self._specs = (
+                specs
+                if isinstance(specs, self.Specs)
+                else
+                self.Specs(**specs)
+            )
             self._env = environment
 
         @property
@@ -342,8 +349,11 @@ class BaseEnvironment(abc.ABC):
 
         @classmethod
         def _get_ep_callback_setters(cls):
-            # TODO NOTE of states: each state only has a single callback; states don't share callbacks!
-            #   that's why we don't need to pass the state (or its wrapper `Environment`) to clients
+            # TODO NOTE of states:
+            # each state only has a single callback;
+            # states don't share callbacks!
+            # that's why we don't need to pass the state
+            # (or its wrapper `Environment`) to clients
             def _state_callback_setter(state, base_setter):
                 return lambda callback: base_setter(
                     state,
@@ -499,17 +509,83 @@ class Environment(BaseEnvironment):
         return super().__call__(*args)
 
     class Event(BaseEnvironment.Event):
-        @BaseEnvironment.Event.callback.setter
+        @property
+        def callback(self):
+            return super().callback
+
+        @callback.setter
         def callback(self, f):
-            def _f_safe(*args, **kwargs):
+            def _safe_callback(*args, **kwargs):
                 nonlocal self, f
                 try:
                     return f(*args, **kwargs)
                 except Exception as e:
-                    # TODO make this available
                     self._env.stop()
                     raise e
-            return BaseEnvironment.Event.callback.fset(self, _f_safe)
+
+            return super(type(self), type(self)).callback.fset(
+                self,
+                _safe_callback
+            )
+
+    class EventListener:
+        @dataclasses.dataclass
+        class Data:
+            class CallableSet(utils.containers.CallableSet):
+                # TODO NOTE return the last value instead of all the values
+                # in case the energyplus api requires it
+                def __call__(self, *args, **kwargs):
+                    _last = lambda x: next(reversed(x))
+                    return _last(
+                        super().__call__(*args, **kwargs)
+                            .values()
+                    )
+
+            callbacks: CallableSet \
+                = dataclasses.field(default_factory=CallableSet)
+
+        def __init__(self, env: BaseEnvironment):
+            self._env = env
+            self._event_data: typing.Mapping[Environment.Event.Specs, self.Data] \
+                = collections.defaultdict(self.Data)
+
+        def subscribe(
+            self,
+            event_specs: BaseEnvironment.Event.Specs,
+            *callbacks: typing.Callable
+        ):
+            if not isinstance(event_specs, self._env.Event.Specs):
+                event_specs = self._env.Event.Specs(**event_specs)
+
+            c = self._event_data[event_specs].callbacks
+            for callback in callbacks:
+                c.add(callback)
+            self._env.event(event_specs).callback = c
+
+            return self
+
+        def unsubscribe(
+            self,
+            event_specs: BaseEnvironment.Event.Specs,
+            *callbacks: typing.Callable
+        ):
+            if not isinstance(event_specs, self._env.Event.Specs):
+                event_specs = self._env.Event.Specs(**event_specs)
+
+            for callback in callbacks:
+                self._event_data[event_specs].callbacks.remove(callback)
+
+            return self
+
+        def sync(self):
+            for event_specs, callback in self._event_data.items():
+                self._env.event(event_specs).callback = callback
+
+            return self
+
+    @functools.cached_property
+    def event_listener(self):
+        return self.EventListener(self)
 
 __all__ = [
     NotReadyError,
