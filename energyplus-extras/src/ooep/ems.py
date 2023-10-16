@@ -48,10 +48,15 @@ class BaseEnvironment(abc.ABC):
         del self._ep_state
 
     def _console_output(self, enabled: bool):
-        self._ep_api.runtime.set_console_output_status(
+        return self._ep_api.runtime.set_console_output_status(
             self._ep_state,
             print_output=enabled
         )
+
+    def _reset(self):
+        if getattr(self, '_ep_state', None) is None:
+            return
+        return self._ep_api.state_manager.reset_state(self._ep_state)
 
     def _exec(self, *args):
         return self._ep_api.runtime.run_energyplus(
@@ -60,7 +65,10 @@ class BaseEnvironment(abc.ABC):
         )
 
     def _stop(self):
-        self._ep_api.runtime.stop_simulation(self._ep_state)
+        return self._ep_api.runtime.stop_simulation(self._ep_state)
+
+    def reset(self):
+        return self._reset()
 
     def __call__(self, *args):
         return self._exec(*args)
@@ -153,7 +161,7 @@ class BaseEnvironment(abc.ABC):
         def __init__(
             self,
             specs: Specs | typing.Mapping,
-            environment: 'Environment'
+            environment: 'BaseEnvironment'
         ):
             self._specs = (
                 specs
@@ -300,7 +308,7 @@ class BaseEnvironment(abc.ABC):
         def __init__(
             self,
             specs: Specs,
-            environment: 'Environment'
+            environment: 'BaseEnvironment'
         ):
             super().__init__(specs, environment)
             self._make_avilable()
@@ -504,8 +512,8 @@ class Environment(BaseEnvironment):
 
         return super().__init__(ep_api)
 
-    def __call__(self, *args, console_output: bool = False):
-        self._console_output(enabled=console_output)
+    def __call__(self, *args, verbose: bool = False):
+        self._console_output(enabled=verbose)
         return super().__call__(*args)
 
     class Event(BaseEnvironment.Event):

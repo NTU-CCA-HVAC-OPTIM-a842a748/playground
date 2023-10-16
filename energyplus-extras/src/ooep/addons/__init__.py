@@ -11,4 +11,6 @@ class OptionalImportError(ImportError):
             f'''Install them through {sys.executable} to use this feature.'''
         )
 
-__all__ = []
+__all__ = [
+    OptionalImportError
+]
